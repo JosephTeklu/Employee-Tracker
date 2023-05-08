@@ -1,0 +1,21 @@
+When application is started the following options are presented:
+- view all departments
+	- show a formatted table with all department names and ids 
+- view all roles
+	- shwo job title, role id, the department that role belongs to, and the salary
+- view all employees
+	- shaw a formatted table showing employees including ids, first/last name, job titles, departments, salaries, and manages they report to
+- add a department
+	- ask for name of apartment and add it to the db
+- add a role
+	- ask for name, salary, department role, and add it to the db
+- add an employee
+	- ask for first/last name, role, manager, and add to db
+- update an employee role
+	- ask for which employee, and ask for their new role and update db
+
+
+USE:
+- MySQL2 package
+- Inuirer Package @8.2.4
+- console.table package
