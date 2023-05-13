@@ -18,6 +18,8 @@ const questions =
   }
 ]
 
+// HELLO ZIOIN AND DAD
+
 // Connect to database
 const db = mysql.createConnection(
   {
