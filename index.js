@@ -13,7 +13,7 @@ app.use(express.json());
 const questions = 
 [
   {type:"list",name:"choice", 
-  choices:["View all departments", "View all roles", "View all employees", "Add a department", "Add a role", "Add an eployee", "Update an employee role", "Exit"],
+  choices:["View all departments", "View all roles", "View all employees", "Add a department", "Add a role", "Add an employee", "Update an employee role", "Exit\n\n"],
   default: "View all departments"
   }
 ]
@@ -28,7 +28,7 @@ const db = mysql.createConnection(
     user: 'joe',
     // MySQL password
     password: '',
-    database: 'classlist_db'
+    database: 'employee_tracker'
   },
   console.log(`Connected to the classlist_db database.`)
 );
@@ -45,14 +45,77 @@ function recur(){
   .then(res => {
     // if the response is false return
     if(!res) {return;}
+
     // or else call this function agian to display the options from inquirer
-    else yellow();
+    else{
+      switch (res) {
+        case "View all departments":
+          // showing the department table
+          db.query('SELECT * FROM department', (err, results) => {
+            // output the departments
+            console.log("");
+            console.table(results);
+            // call the recurscion to output the options again
+            recur();
+          });
+          
+          break;
+        case "View all role":
+          // showing the roles table
+          db.query('SELECT * FROM roles', (err, results) => {
+            // output the departments
+            console.log("");
+            console.table(results);
+          });
+          // call the recurscion to output the options again
+          recur();
+          break;
+        case "View all employee":
+            // showing the roles table
+            db.query('SELECT * FROM employees', (err, results) => {
+              // output the departments
+              console.log("");
+              console.table(results);
+            });
+            // call the recurscion to output the options again
+            recur();
+          break;
+        case "Add a department":
+          console.log("add department")
+          break;
+        case "Add a role":
+          console.log("add role")
+          break;
+        case "Add an employee":
+          console.log("add employee")
+          break;
+        case "Update an empoyee role":
+          console.log("update e role")
+          break;
+        default:
+          console.log("Thank you for using Employee-Tracker Database!")
+        break;
+      }
+
+    }
   })
 }
 
+
 function init() {
   // call recur and get use's choice
-  recur();
+  console.log(recur());
+
+  //  deleting query
+  // db.query(`DELETE FROM employee_tracker WHERE id = ?`, 3, (err, result) => {
+  //   if (err) {
+  //     console.log(err);
+  //   }
+  //   console.log(result);
+  // });
+
+
+
 }
 
 init();

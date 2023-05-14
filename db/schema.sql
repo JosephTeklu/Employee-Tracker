@@ -1,5 +1,5 @@
 DROP DATABASE IF EXISTS Employee_Tracker;
-CREATE DATABASE Employee_Tracker;
+CREATE DATABASE employee_tracker;
 
 USE Employee_Tracker;
 
@@ -18,9 +18,9 @@ CREATE TABLE role(
     department_id INT, -- refrence to department role 
 
     -- specify that the (department_id) will come from a different table
-    FOREIGN KEY(department_id),
+    FOREIGN KEY(department_id)
     -- refrence the id property from the department table for the foriegn key
-    REFERENCES department(id),
+    REFERENCES department(id)
     -- if a department gets deletes what ever rol is using it will be set it to null
     ON DELETE SET NULL
 );
@@ -33,7 +33,7 @@ CREATE TABLE employee(
     manager_id INT, -- null if employee has no manager
 
     -- specify that the (id) will come from a different table
-    FOREIGN KEY(id),
+    FOREIGN KEY(role_id)
     -- refrence the id from the table role to use for the foriegn key
     REFERENCES role(id)
 );
