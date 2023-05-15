@@ -18,6 +18,13 @@ const questions =
   }
 ]
 
+// array for holding department names
+let depNames = ["HR", "IT", "Accounting", "Front Desk", "Sales", "Customer Service"];
+// array for holding roles
+let roles = ["Sales Manager", "Accountant", "Techinican", "Front Desk Rep", "Customer Service Rep", "HR Manager"];
+// array for holding employee names
+let empNames = ["NO MANAGER","John Baldwin", "Trace Martin", "Aaron Tanner", "Ryan King", "Michael Gibson", "Biz Gebrekidan", "Evelyn Curran", "Kit Herrington", "Jason DeLine", "Tyler Smith", "Kali Lott", "Melody Tovar"];
+
 // HELLO ZIOIN AND DAD
 
 // Connect to database
@@ -60,34 +67,82 @@ function recur(){
           });
           
           break;
-        case "View all role":
+        case "View all roles":
           // showing the roles table
-          db.query('SELECT * FROM roles', (err, results) => {
+          db.query('SELECT * FROM role', (err, results) => {
             // output the departments
             console.log("");
             console.table(results);
-          });
-          // call the recurscion to output the options again
+            // call the recurscion to output the options again
           recur();
+          });
+
           break;
-        case "View all employee":
+        case "View all employees":
             // showing the roles table
-            db.query('SELECT * FROM employees', (err, results) => {
+            db.query('SELECT * FROM employee', (err, results) => {
+              if(err) console.log(err);
               // output the departments
               console.log("");
               console.table(results);
+              // call the recurscion to output the options again
+              recur();
             });
-            // call the recurscion to output the options again
-            recur();
           break;
         case "Add a department":
-          console.log("add department")
+          // ask for the name of the new department
+          inquirer.prompt([{type: "input", message: "What is the new of the new department?\n", name:"newDep"}])
+          .then(response => {
+            // add the new department to the db and call this function again
+            db.query(`INSERT INTO department (name) VALUES('${response.newDep}')`, (err, results) => {
+              if(err) console.log(err);
+              // add new department into the array
+              depNames.push(response.newDep)
+              console.log("");
+              recur();
+            });
+          })
           break;
         case "Add a role":
-          console.log("add role")
+            // ask questions for the new role
+            inquirer.prompt([{type: "input", message: "What is the name of the new role?\n", name:"roleName"},
+            {type:"input", message:"What is the salary for this role?", name:"salary"},
+            {type:"list", message:"Which department will this role belonge to?", choices: depNames, name: "depChoice"}])
+            .then(response => {
+              // add the new role to the db and call this function again
+              db.query(`INSERT INTO role (title, salary, department_id) VALUES('${response.roleName}',${response.salary}, ${depNames.indexOf(response.depChoice)+1})`, (err, results) => {
+                if(err) console.log(err);
+                // add role name to the roles array
+                roles.push(response.roleName);
+                console.log("");
+                recur();
+              });
+            })
           break;
         case "Add an employee":
-          console.log("add employee")
+          // ask question for new employee
+          inquirer.prompt([{type: "input", message: "What is the employee's first name?", name: "firstN"},
+                           {type: "input", message: "What is the employee's last name?", name: "lastN"},
+                           {type: "list", message: "What is the employee's role?", choices:roles, name: "role"},
+                           {type: "list", message:"Who is the employee's manager? If this employee is a manager select NO MANAGER", choices:empNames, name:"manager"}])
+          .then(response => {
+            // if the new employee does not have a manager 
+            if(response.manager == "NO MANAGER"){
+              // add the new employee to the db and call this function again
+              db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES('${response.firstN}', '${response.lastN}', ${roles.indexOf(response.role)+1}, NULL)`, (err, results) => {
+                if(err) console.log(err);
+                empNames.push(response.firstN + " " + response.lastN);
+                recur();
+              });
+            }
+            else{
+              // add the new employee to the db and call this function again
+              db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES('${response.firstN}', '${response.lastN}', ${roles.indexOf(response.role)+1}, ${empNames.indexOf(response.manager)})`, (err, results) => {
+               empNames.push(response.firstN + " " + response.lastN);
+               recur();
+              });
+            }
+          })
           break;
         case "Update an empoyee role":
           console.log("update e role")
@@ -100,6 +155,7 @@ function recur(){
     }
   })
 }
+
 
 
 function init() {

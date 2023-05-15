@@ -4,14 +4,14 @@ CREATE DATABASE employee_tracker;
 USE Employee_Tracker;
 
 CREATE TABLE department (
-    id INT NOT NULL,
+    id INT NOT NULL AUTO_INCREMENT,
     name VARCHAR(30),
     -- make the id a primary key for the role table
     PRIMARY KEY (id)
 );
 
 CREATE TABLE role(
-    id INT NOT NULL,
+    id INT NOT NULL AUTO_INCREMENT,
     PRIMARY KEY (id), -- make id a primary key for the employee table
     title VARCHAR(30) NOT NULL,
     salary DECIMAL NOT NULL,
@@ -26,7 +26,8 @@ CREATE TABLE role(
 );
 
 CREATE TABLE employee(
-    id INT NOT NULL,
+    id INT NOT NULL AUTO_INCREMENT,
+    PRIMARY KEY(id),
     first_name VARCHAR(30),
     last_name VARCHAR(30),
     role_id INT NOT NULL,
