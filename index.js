@@ -31,11 +31,12 @@ const db = mysql.createConnection(
   },);
 
 function recur(){
+
   // send inquirer the questions array
   inquirer.prompt(questions)
   .then(response =>{
     // if the choosen slection is exit then return false
-    if(response.choice === "Exit") {return 0;}
+    if(response.choice === "Exit") {console.log("Thank you for using Empoyee-Trcker Database."); return 0;}
     // if the choosen selection is not exit then return the user's choice
     else{return response.choice;}
   })
@@ -46,12 +47,14 @@ function recur(){
     // or else call this function agian to display the options from inquirer
     else{
 
+      // switch case to handel response
       switch (res) {
+
         case "View all departments":
           // showing the department table
           db.query('SELECT * FROM department', (err, results) => {
-            // output the departments
             console.log("");
+            // output table
             console.table(results);
             // call the recurscion to output the options again
             recur();
@@ -61,9 +64,7 @@ function recur(){
         case "View all roles":
           // showing the roles table
           db.query('SELECT role.id, role.title,role.salary, department.name AS Department FROM role LEFT JOIN department ON department_id = department.id', (err, results) => {
-            if(err){
-              throw err
-            }
+            if(err){throw err}
             // output the departments
             console.log("");
             console.table(results);
@@ -73,14 +74,12 @@ function recur(){
           break;
 
         case "View all employees":
-          // employees including ids, first/last name, job titles, departments, salaries, and manages they report to
             // showing the roles table
             db.query('SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name AS Department, manager.first_name AS manager FROM employee LEFT JOIN role ON role_id=role.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON role.department_id = department.id', (err, results) => {
               if(err) console.log(err);
               // output the departments
               console.log("");
               console.table(results);
-              // join();
               // call the recurscion to output the options again
               recur();
             });
@@ -161,30 +160,19 @@ function recur(){
           })
           break;
 
+        case "Exit":
+          console.log("Thank you for using Employee-Tracker Database!");
+          return(0);
+          break;
+
         default:
-          console.log("Thank you for using Employee-Tracker Database!")
+          console.log("Thank you for using Employee-Tracker Database!");
         break;
       }
     }
   })
 }
 
-// https://watch.screencastify.com/v/IoZm64J9o2AnvuZcjok8
 
-function init() {
-  // call recur and get use's choice
-  console.log(recur());
+recur();
 
-  //  deleting query
-  // db.query(`DELETE FROM employee_tracker WHERE id = ?`, 3, (err, result) => {
-  //   if (err) {
-  //     console.log(err);
-  //   }
-  //   console.log(result);
-  // });
-
-
-
-}
-
-init();
