@@ -1,13 +1,5 @@
-const express = require('express');
 const inquirer = require('inquirer'); 
 const mysql = require('mysql2');
-
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-// Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 // array for questions
 const questions = 
@@ -23,7 +15,7 @@ let depNames = ["HR", "IT", "Accounting", "Front Desk", "Sales", "Customer Servi
 // array for holding roles
 let roles = ["Sales Manager", "Accountant", "Techinican", "Front Desk Rep", "Customer Service Rep", "HR Manager"];
 // array for holding employee names
-let empNames = ["NO MANAGER","John Baldwin", "Trace Martin", "Aaron Tanner", "Ryan King", "Michael Gibson", "Biz Gebrekidan", "Evelyn Curran", "Kit Herrington", "Jason DeLine", "Tyler Smith", "Kali Lott", "Melody Tovar"];
+let empNames = ["John Baldwin", "Trace Martin", "Aaron Tanner", "Ryan King", "Michael Gibson", "Biz Gebrekidan", "Evelyn Curran", "Kit Herrington", "Jason DeLine", "Tyler Smith", "Kali Lott", "Melody Tovar"];
 
 // HELLO ZIOIN AND DAD
 
@@ -36,9 +28,7 @@ const db = mysql.createConnection(
     // MySQL password
     password: '',
     database: 'employee_tracker'
-  },
-  console.log(`Connected to the classlist_db database.`)
-);
+  },);
 
 function recur(){
   // send inquirer the questions array
@@ -55,6 +45,7 @@ function recur(){
 
     // or else call this function agian to display the options from inquirer
     else{
+
       switch (res) {
         case "View all departments":
           // showing the department table
@@ -65,30 +56,36 @@ function recur(){
             // call the recurscion to output the options again
             recur();
           });
-          
           break;
+
         case "View all roles":
           // showing the roles table
-          db.query('SELECT * FROM role', (err, results) => {
+          db.query('SELECT role.id, role.title,role.salary, department.name AS Department FROM role LEFT JOIN department ON department_id = department.id', (err, results) => {
+            if(err){
+              throw err
+            }
             // output the departments
             console.log("");
             console.table(results);
             // call the recurscion to output the options again
           recur();
           });
-
           break;
+
         case "View all employees":
+          // employees including ids, first/last name, job titles, departments, salaries, and manages they report to
             // showing the roles table
-            db.query('SELECT * FROM employee', (err, results) => {
+            db.query('SELECT employee.first_name, employee.last_name, role.salary, role.title, department.name AS Department, manager.first_name AS manager FROM employee LEFT JOIN role ON role_id=role.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON role.department_id = department.id', (err, results) => {
               if(err) console.log(err);
               // output the departments
               console.log("");
               console.table(results);
+              // join();
               // call the recurscion to output the options again
               recur();
             });
           break;
+
         case "Add a department":
           // ask for the name of the new department
           inquirer.prompt([{type: "input", message: "What is the new of the new department?\n", name:"newDep"}])
@@ -99,10 +96,12 @@ function recur(){
               // add new department into the array
               depNames.push(response.newDep)
               console.log("");
+              console.log(`${response.newDep} has been added to the database.`)
               recur();
             });
           })
           break;
+
         case "Add a role":
             // ask questions for the new role
             inquirer.prompt([{type: "input", message: "What is the name of the new role?\n", name:"roleName"},
@@ -115,11 +114,14 @@ function recur(){
                 // add role name to the roles array
                 roles.push(response.roleName);
                 console.log("");
+                console.log(`${response.roleName} has been added to the database.`)
                 recur();
               });
             })
           break;
+
         case "Add an employee":
+          empNames.push("NO MANAGER");
           // ask question for new employee
           inquirer.prompt([{type: "input", message: "What is the employee's first name?", name: "firstN"},
                            {type: "input", message: "What is the employee's last name?", name: "lastN"},
@@ -131,7 +133,9 @@ function recur(){
               // add the new employee to the db and call this function again
               db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES('${response.firstN}', '${response.lastN}', ${roles.indexOf(response.role)+1}, NULL)`, (err, results) => {
                 if(err) console.log(err);
+                // add the new name to the employees array
                 empNames.push(response.firstN + " " + response.lastN);
+                console.log(`${response.firstN} ${response.lastN} has been added to the database.`)
                 recur();
               });
             }
@@ -144,19 +148,28 @@ function recur(){
             }
           })
           break;
-        case "Update an empoyee role":
-          console.log("update e role")
+
+        case "Update an employee role":
+          inquirer.prompt([{type: "list", message: "Which employee's role do you want to update?", choices:empNames, name: "emp"},
+                           {type: "list", message: "Which role do you want to assign the selected employee?", choices: roles, name:"newRole"}])
+          .then(response =>{
+            db.query(`UPDATE employee SET role_id=${roles.indexOf(response.newRole)+1} WHERE id=${empNames.indexOf(response.emp)}`, (err, results) => {
+              if (err) console.log(err);
+              console.log(`Updated ${response.emp}'s role to ${response.newRole}`);
+              recur();
+            });
+          })
           break;
+
         default:
           console.log("Thank you for using Employee-Tracker Database!")
         break;
       }
-
     }
   })
 }
 
-
+// https://watch.screencastify.com/v/IoZm64J9o2AnvuZcjok8
 
 function init() {
   // call recur and get use's choice
